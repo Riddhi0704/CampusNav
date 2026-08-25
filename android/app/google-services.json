@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "247952793700",
+    "project_id": "campusnav-ea5c7",
+    "storage_bucket": "campusnav-ea5c7.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:247952793700:android:fff7dffffdf0f7f52fbf71",
+        "android_client_info": {
+          "package_name": "com.example.campus_nav"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB9Dk5nmUGw5Z08JPzLM-uzxKup0TEuteA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
