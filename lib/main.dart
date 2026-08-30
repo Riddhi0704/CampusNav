@@ -3,6 +3,7 @@ import 'package:firebase_core/firebase_core.dart';
 
 import 'firebase_options.dart';
 import 'screens/splash_screen.dart';
+import 'screens/login_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -22,11 +23,19 @@ class CampusNavApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'CampusNav',
+
       theme: ThemeData(
         primarySwatch: Colors.blue,
         scaffoldBackgroundColor: Colors.white,
         fontFamily: 'Poppins',
       ),
+
+      // Named routes
+      routes: {
+        '/login': (context) => const LoginScreen(),
+      },
+
+      // App starts with splash screen
       home: const SplashScreen(),
     );
   }
