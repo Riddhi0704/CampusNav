@@ -1,9 +1,6 @@
 import 'dart:async';
-
 import 'package:flutter/material.dart';
-
 import 'login_screen.dart';
-import 'home_screen.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -23,7 +20,7 @@ class _SplashScreenState extends State<SplashScreen> {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
-          builder: (context) => LoginScreen(),
+          builder: (_) => const LoginScreen(),
         ),
       );
     });
@@ -32,30 +29,32 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.location_on,
-              size: 90,
-              color: Colors.blue,
+            Image.asset(
+              'assets/campusnav_logo.png',
+              width: 190,
             ),
-            const SizedBox(height: 20),
+
+            const SizedBox(height: 25),
+
             const Text(
-              'CampusNav',
+              'SMART CAMPUS NAVIGATION',
               style: TextStyle(
-                fontSize: 32,
-                fontWeight: FontWeight.bold,
+                color: Color(0xFF123A5A),
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                letterSpacing: 1.5,
               ),
             ),
-            const SizedBox(height: 8),
-            const Text(
-              'Smart Campus Navigation',
-              style: TextStyle(
-                fontSize: 16,
-                color: Colors.grey,
-              ),
+
+            const SizedBox(height: 25),
+
+            const CircularProgressIndicator(
+              color: Color(0xFFF58220),
             ),
           ],
         ),
