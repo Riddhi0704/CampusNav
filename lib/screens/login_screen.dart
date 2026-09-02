@@ -103,7 +103,7 @@ class _LoginScreenState extends State<LoginScreen> {
               // CampusNav Logo
               Center(
                 child: Image.asset(
-                  'assets/images/campusnav_logo.png',
+                  'assets/campusnav_logo.png',
                   width: 150,
                   height: 150,
                   fit: BoxFit.contain,
