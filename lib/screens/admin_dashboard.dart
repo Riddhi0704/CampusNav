@@ -1,11 +1,29 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 import 'manage_buildings_screen.dart';
 import 'manage_locations_screen.dart';
+import 'manage_departments_screen.dart';
 import 'admin_profile_screen.dart';
+import 'campus_locations_screen.dart';
+import 'manage_users_screen.dart';
 
-class AdminDashboard extends StatelessWidget {
+class AdminDashboard extends StatefulWidget {
   const AdminDashboard({super.key});
+
+  @override
+  State<AdminDashboard> createState() => _AdminDashboardState();
+}
+
+class _AdminDashboardState extends State<AdminDashboard> {
+  final Color primaryColor = const Color(0xFF2563EB);
+
+  Stream<int> _getCollectionCount(String collection) {
+    return FirebaseFirestore.instance
+        .collection(collection)
+        .snapshots()
+        .map((snapshot) => snapshot.size);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -39,14 +57,12 @@ class AdminDashboard extends StatelessWidget {
             ),
           ),
 
-          // ADMIN PROFILE BUTTON
           IconButton(
             onPressed: () {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) =>
-                      const AdminProfileScreen(),
+                  builder: (context) => const AdminProfileScreen(),
                 ),
               );
             },
@@ -65,7 +81,6 @@ class AdminDashboard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Welcome Section
             const Text(
               'Welcome, Admin! 👋',
               style: TextStyle(
@@ -105,18 +120,20 @@ class AdminDashboard extends StatelessWidget {
             Row(
               children: [
                 Expanded(
-                  child: _buildStatCard(
+                  child: _buildLiveStatCard(
                     icon: Icons.business_outlined,
                     title: 'Buildings',
-                    value: '0',
+                    collection: 'buildings',
                   ),
                 ),
+
                 const SizedBox(width: 12),
+
                 Expanded(
-                  child: _buildStatCard(
+                  child: _buildLiveStatCard(
                     icon: Icons.location_on_outlined,
                     title: 'Locations',
-                    value: '0',
+                    collection: 'campus_locations',
                   ),
                 ),
               ],
@@ -128,18 +145,20 @@ class AdminDashboard extends StatelessWidget {
             Row(
               children: [
                 Expanded(
-                  child: _buildStatCard(
+                  child: _buildLiveStatCard(
                     icon: Icons.school_outlined,
                     title: 'Departments',
-                    value: '0',
+                    collection: 'departments',
                   ),
                 ),
+
                 const SizedBox(width: 12),
+
                 Expanded(
-                  child: _buildStatCard(
+                  child: _buildLiveStatCard(
                     icon: Icons.people_outline,
                     title: 'Users',
-                    value: '0',
+                    collection: 'users',
                   ),
                 ),
               ],
@@ -203,11 +222,11 @@ class AdminDashboard extends StatelessWidget {
               title: 'Manage Departments',
               subtitle: 'Add and manage departments',
               onTap: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text(
-                      'Manage Departments coming soon',
-                    ),
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) =>
+                        const ManageDepartmentsScreen(),
                   ),
                 );
               },
@@ -221,11 +240,11 @@ class AdminDashboard extends StatelessWidget {
               title: 'Manage Users',
               subtitle: 'View and manage users',
               onTap: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text(
-                      'Manage Users coming soon',
-                    ),
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) =>
+                        const ManageUsersScreen(),
                   ),
                 );
               },
@@ -239,11 +258,11 @@ class AdminDashboard extends StatelessWidget {
               title: 'Manage Campus Map',
               subtitle: 'Update campus map information',
               onTap: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text(
-                      'Campus Map management coming soon',
-                    ),
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) =>
+                        const CampusLocationsScreen(),
                   ),
                 );
               },
@@ -262,19 +281,7 @@ class AdminDashboard extends StatelessWidget {
         type: BottomNavigationBarType.fixed,
         selectedItemColor: Colors.blue,
         unselectedItemColor: Colors.grey,
-
         onTap: (index) {
-          // Profile
-          if (index == 3) {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) =>
-                    const AdminProfileScreen(),
-              ),
-            );
-          }
-
           // Buildings
           if (index == 1) {
             Navigator.push(
@@ -288,16 +295,26 @@ class AdminDashboard extends StatelessWidget {
 
           // Map
           if (index == 2) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text(
-                  'Campus Map coming soon',
-                ),
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) =>
+                    const CampusLocationsScreen(),
+              ),
+            );
+          }
+
+          // Profile
+          if (index == 3) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) =>
+                    const AdminProfileScreen(),
               ),
             );
           }
         },
-
         items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.dashboard_outlined),
@@ -321,6 +338,36 @@ class AdminDashboard extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+
+  // ----------------------------------------------------------
+  // LIVE STATISTICS CARD
+  // ----------------------------------------------------------
+  Widget _buildLiveStatCard({
+    required IconData icon,
+    required String title,
+    required String collection,
+  }) {
+    return StreamBuilder<int>(
+      stream: _getCollectionCount(collection),
+      builder: (context, snapshot) {
+        String value = '...';
+
+        if (snapshot.hasData) {
+          value = snapshot.data.toString();
+        }
+
+        if (snapshot.hasError) {
+          value = '!';
+        }
+
+        return _buildStatCard(
+          icon: icon,
+          title: title,
+          value: value,
+        );
+      },
     );
   }
 
@@ -396,7 +443,6 @@ class AdminDashboard extends StatelessWidget {
           horizontal: 16,
           vertical: 6,
         ),
-
         leading: Container(
           padding: const EdgeInsets.all(10),
           decoration: BoxDecoration(
@@ -408,7 +454,6 @@ class AdminDashboard extends StatelessWidget {
             color: Colors.blue,
           ),
         ),
-
         title: Text(
           title,
           style: const TextStyle(
@@ -416,9 +461,7 @@ class AdminDashboard extends StatelessWidget {
             color: Color(0xFF172554),
           ),
         ),
-
         subtitle: Text(subtitle),
-
         trailing: const Icon(
           Icons.arrow_forward_ios,
           size: 16,

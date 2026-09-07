@@ -120,7 +120,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
               // CampusNav Logo
               Center(
                 child: Image.asset(
-                  'assets/images/campusnav_logo.png',
+                  'assets/campusnav_logo.png',
                   width: 140,
                   height: 140,
                   fit: BoxFit.contain,
