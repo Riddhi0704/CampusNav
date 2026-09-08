@@ -1,4 +1,4 @@
-class CampusLocation {
+  class CampusLocation {
   final String id;
   final String name;
   final String description;
@@ -31,8 +31,8 @@ class CampusLocation {
       category: data['category'] ?? '',
       building: data['building'] ?? '',
       floor: data['floor'] ?? '',
-      latitude: (data['latitude'] ?? 0).toDouble(),
-      longitude: (data['longitude'] ?? 0).toDouble(),
+      latitude: double.tryParse(data['latitude'].toString()) ?? 0.0,
+      longitude: double.tryParse(data['longitude'].toString()) ?? 0.0,
     );
   }
 

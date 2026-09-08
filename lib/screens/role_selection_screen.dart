@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:campus_nav/screens/student_dashboard.dart';
-import 'package:campus_nav/screens/admin_dashboard.dart';
 
 class RoleSelectionScreen extends StatefulWidget {
   const RoleSelectionScreen({super.key});
@@ -12,7 +11,6 @@ class RoleSelectionScreen extends StatefulWidget {
 }
 
 class _RoleSelectionScreenState extends State<RoleSelectionScreen> {
-  String selectedRole = 'student';
   bool isLoading = false;
 
   Future<void> _continue() async {
@@ -37,7 +35,7 @@ class _RoleSelectionScreenState extends State<RoleSelectionScreen> {
           .doc(user.uid)
           .set(
         {
-          'role': selectedRole,
+          'role': 'Student',
         },
         SetOptions(merge: true),
       );
@@ -45,17 +43,11 @@ class _RoleSelectionScreenState extends State<RoleSelectionScreen> {
       if (!mounted) return;
 
       Navigator.pushReplacement(
-  context,
-  MaterialPageRoute(
-    builder: (context) {
-      if (selectedRole == 'student') {
-        return const StudentDashboard();
-      } else {
-        return const AdminDashboard();
-      }
-    },
-  ),
-);
+        context,
+        MaterialPageRoute(
+          builder: (context) => const StudentDashboard(),
+        ),
+      );
     } on FirebaseException catch (e) {
       debugPrint('ROLE UPDATE ERROR: ${e.code}');
       debugPrint('ROLE UPDATE MESSAGE: ${e.message}');
@@ -88,98 +80,6 @@ class _RoleSelectionScreenState extends State<RoleSelectionScreen> {
     }
   }
 
-  Widget _roleCard({
-    required String role,
-    required IconData icon,
-    required String title,
-    required String description,
-  }) {
-    final bool isSelected = selectedRole == role;
-
-    return GestureDetector(
-      onTap: isLoading
-          ? null
-          : () {
-              setState(() {
-                selectedRole = role;
-              });
-            },
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        width: double.infinity,
-        padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          color: isSelected
-              ? Colors.blue.withValues(alpha: 0.08)
-              : Colors.white,
-          borderRadius: BorderRadius.circular(18),
-          border: Border.all(
-            color: isSelected ? Colors.blue : Colors.grey.shade300,
-            width: isSelected ? 2 : 1,
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.05),
-              blurRadius: 8,
-              offset: const Offset(0, 3),
-            ),
-          ],
-        ),
-        child: Row(
-          children: [
-            Container(
-              width: 55,
-              height: 55,
-              decoration: BoxDecoration(
-                color: isSelected
-                    ? Colors.blue
-                    : Colors.grey.shade100,
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                icon,
-                color: isSelected ? Colors.white : Colors.blue,
-                size: 28,
-              ),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 5),
-                  Text(
-                    description,
-                    style: const TextStyle(
-                      fontSize: 13,
-                      color: Colors.grey,
-                      height: 1.4,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(width: 10),
-            Icon(
-              isSelected
-                  ? Icons.radio_button_checked
-                  : Icons.radio_button_off,
-              color: isSelected ? Colors.blue : Colors.grey,
-              size: 25,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -193,7 +93,7 @@ class _RoleSelectionScreenState extends State<RoleSelectionScreen> {
 
               // CampusNav Logo
               Image.asset(
-                'assets/images/campusnav_logo.png',
+                'assets/campusnav_logo.png',
                 width: 130,
                 height: 130,
                 fit: BoxFit.contain,
@@ -201,7 +101,6 @@ class _RoleSelectionScreenState extends State<RoleSelectionScreen> {
 
               const SizedBox(height: 25),
 
-              // Heading
               const Text(
                 'Choose Your Role',
                 textAlign: TextAlign.center,
@@ -214,7 +113,7 @@ class _RoleSelectionScreenState extends State<RoleSelectionScreen> {
               const SizedBox(height: 10),
 
               const Text(
-                'Select how you will use CampusNav',
+                'New accounts are registered as Student',
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 15,
@@ -224,29 +123,75 @@ class _RoleSelectionScreenState extends State<RoleSelectionScreen> {
 
               const SizedBox(height: 35),
 
-              // Student
-              _roleCard(
-                role: 'student',
-                icon: Icons.school_outlined,
-                title: 'Student',
-                description:
-                    'Navigate your campus and find buildings, rooms, and facilities.',
-              ),
-
-              const SizedBox(height: 18),
-
-              // Admin
-              _roleCard(
-                role: 'admin',
-                icon: Icons.admin_panel_settings_outlined,
-                title: 'Admin',
-                description:
-                    'Manage campus locations, facilities, and application information.',
+              // Student Role
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: Colors.blue.withValues(alpha: 0.08),
+                  borderRadius: BorderRadius.circular(18),
+                  border: Border.all(
+                    color: Colors.blue,
+                    width: 2,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.05),
+                      blurRadius: 8,
+                      offset: const Offset(0, 3),
+                    ),
+                  ],
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 55,
+                      height: 55,
+                      decoration: const BoxDecoration(
+                        color: Colors.blue,
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
+                        Icons.school_outlined,
+                        color: Colors.white,
+                        size: 28,
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    const Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Student',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          SizedBox(height: 5),
+                          Text(
+                            'Navigate your campus and find buildings, rooms, and facilities.',
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: Colors.grey,
+                              height: 1.4,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const Icon(
+                      Icons.radio_button_checked,
+                      color: Colors.blue,
+                      size: 25,
+                    ),
+                  ],
+                ),
               ),
 
               const SizedBox(height: 35),
 
-              // Continue Button
               SizedBox(
                 width: double.infinity,
                 height: 55,

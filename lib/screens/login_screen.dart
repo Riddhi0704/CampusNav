@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:campus_nav/screens/signup_screen.dart';
 import 'package:campus_nav/screens/home_screen.dart';
 import 'package:campus_nav/screens/forgot_password_screen.dart';
+import 'package:campus_nav/screens/admin_dashboard.dart';
+import 'package:campus_nav/screens/student_dashboard.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -16,6 +19,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final passwordController = TextEditingController();
 
   bool obscurePassword = true;
+  bool isLoading = false;
 
   @override
   void dispose() {
@@ -24,12 +28,10 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
-  // Firebase Login
   Future<void> _login() async {
     final email = emailController.text.trim();
     final password = passwordController.text.trim();
 
-    // Check empty fields
     if (email.isEmpty || password.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -39,21 +41,69 @@ class _LoginScreenState extends State<LoginScreen> {
       return;
     }
 
+    setState(() {
+      isLoading = true;
+    });
+
     try {
-      // Sign in using Firebase Authentication
-      await FirebaseAuth.instance.signInWithEmailAndPassword(
+      final credential =
+          await FirebaseAuth.instance.signInWithEmailAndPassword(
         email: email,
         password: password,
       );
 
+      final user = credential.user;
+
+      if (user == null) {
+        throw Exception('User account not found.');
+      }
+
+      // Get user role from Firestore
+      final doc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .get();
+
+      if (!doc.exists) {
+        throw Exception('User profile not found.');
+      }
+
+      final data = doc.data();
+
+      if (data == null) {
+        throw Exception('User profile data is empty.');
+      }
+
+      // Handle both old lowercase roles and new capitalized roles
+      final role = (data['role'] ?? 'Student')
+          .toString()
+          .trim()
+          .toLowerCase();
+
       if (!mounted) return;
 
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (context) => const HomeScreen(),
-        ),
-      );
+      if (role == 'admin') {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => const AdminDashboard(),
+          ),
+        );
+      } else if (role == 'student') {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => const StudentDashboard(),
+          ),
+        );
+      } else {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => const HomeScreen(),
+          ),
+        );
+      }
     } on FirebaseAuthException catch (e) {
       String message = 'Login failed.';
 
@@ -71,9 +121,7 @@ class _LoginScreenState extends State<LoginScreen> {
       if (!mounted) return;
 
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(message),
-        ),
+        SnackBar(content: Text(message)),
       );
     } catch (e) {
       debugPrint('LOGIN ERROR: $e');
@@ -85,6 +133,12 @@ class _LoginScreenState extends State<LoginScreen> {
           content: Text('Error: $e'),
         ),
       );
+    } finally {
+      if (mounted) {
+        setState(() {
+          isLoading = false;
+        });
+      }
     }
   }
 
@@ -112,7 +166,6 @@ class _LoginScreenState extends State<LoginScreen> {
 
               const SizedBox(height: 25),
 
-              // Welcome Text
               const Text(
                 'Welcome Back!',
                 style: TextStyle(
@@ -133,7 +186,6 @@ class _LoginScreenState extends State<LoginScreen> {
 
               const SizedBox(height: 30),
 
-              // Email Label
               const Text(
                 'Email',
                 style: TextStyle(
@@ -143,7 +195,6 @@ class _LoginScreenState extends State<LoginScreen> {
 
               const SizedBox(height: 8),
 
-              // Email Field
               TextField(
                 controller: emailController,
                 keyboardType: TextInputType.emailAddress,
@@ -158,7 +209,6 @@ class _LoginScreenState extends State<LoginScreen> {
 
               const SizedBox(height: 20),
 
-              // Password Label
               const Text(
                 'Password',
                 style: TextStyle(
@@ -168,7 +218,6 @@ class _LoginScreenState extends State<LoginScreen> {
 
               const SizedBox(height: 8),
 
-              // Password Field
               TextField(
                 controller: passwordController,
                 obscureText: obscurePassword,
@@ -195,7 +244,6 @@ class _LoginScreenState extends State<LoginScreen> {
 
               const SizedBox(height: 10),
 
-              // Forgot Password
               Align(
                 alignment: Alignment.centerRight,
                 child: TextButton(
@@ -204,44 +252,50 @@ class _LoginScreenState extends State<LoginScreen> {
                       context,
                       MaterialPageRoute(
                         builder: (context) =>
-                        const ForgotPasswordScreen(),
+                            const ForgotPasswordScreen(),
                       ),
                     );
                   },
-                  child: const Text(
-                    'Forgot Password?',
-                  ),
+                  child: const Text('Forgot Password?'),
                 ),
               ),
 
               const SizedBox(height: 15),
 
-              // Login Button
               SizedBox(
                 width: double.infinity,
                 height: 55,
                 child: ElevatedButton(
-                  onPressed: _login,
+                  onPressed: isLoading ? null : _login,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.blue,
                     foregroundColor: Colors.white,
+                    disabledBackgroundColor: Colors.blue.shade200,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
                   ),
-                  child: const Text(
-                    'Login',
-                    style: TextStyle(
-                      fontSize: 17,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
+                  child: isLoading
+                      ? const SizedBox(
+                          height: 24,
+                          width: 24,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2.5,
+                            color: Colors.white,
+                          ),
+                        )
+                      : const Text(
+                          'Login',
+                          style: TextStyle(
+                            fontSize: 17,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                 ),
               ),
 
               const SizedBox(height: 20),
 
-              // Signup
               Center(
                 child: TextButton(
                   onPressed: () {

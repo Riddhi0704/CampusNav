@@ -90,7 +90,7 @@ class _SignupScreenState extends State<SignupScreen> {
           .set({
         'name': name,
         'email': email,
-        'role': 'student',
+        'role': 'Student',
         'createdAt': FieldValue.serverTimestamp(),
       });
 
@@ -180,7 +180,7 @@ class _SignupScreenState extends State<SignupScreen> {
               // CampusNav Logo
               Center(
                 child: Image.asset(
-                  'assets/images/campusnav_logo.png',
+                  'assets/campusnav_logo.png',
                   width: 125,
                   height: 125,
                   fit: BoxFit.contain,

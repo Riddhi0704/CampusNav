@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'login_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -524,38 +525,40 @@ class _ProfileScreenState extends State<ProfileScreen> {
   // LOGOUT
   // ==========================================================
 
-  Future<void> _logout() async {
-    try {
-      await _auth.signOut();
+ Future<void> _logout() async {
+  try {
+    await _auth.signOut();
 
-      if (!mounted) return;
+    if (!mounted) return;
 
-      Navigator.of(context).pushNamedAndRemoveUntil(
-        '/login',
-        (route) => false,
-      );
-    } on FirebaseAuthException catch (e) {
-      if (!mounted) return;
+    Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute(
+        builder: (context) => const LoginScreen(),
+      ),
+      (route) => false,
+    );
+  } on FirebaseAuthException catch (e) {
+    if (!mounted) return;
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'Logout failed: ${e.message ?? e.code}',
-          ),
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          'Logout failed: ${e.message ?? e.code}',
         ),
-      );
-    } catch (e) {
-      if (!mounted) return;
+      ),
+    );
+  } catch (e) {
+    if (!mounted) return;
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'Logout failed: $e',
-          ),
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          'Logout failed: $e',
         ),
-      );
-    }
+      ),
+    );
   }
+}
 
   // ==========================================================
   // LOGOUT CONFIRMATION
